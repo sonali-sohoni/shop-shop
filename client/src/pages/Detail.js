@@ -1,50 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@apollo/client";
 
-import { QUERY_PRODUCTS } from '../utils/queries';
-import spinner from '../assets/spinner.gif';
+import { QUERY_PRODUCTS } from "../utils/queries";
+import spinner from "../assets/spinner.gif";
+
+import { useStoreContext } from "../utils/GlobalState";
+import { UPDATE_PRODUCTS } from "../utils/actions";
 
 function Detail() {
-  const { id } = useParams();
+	const [state, dispatch] = useStoreContext();
 
-  const [currentProduct, setCurrentProduct] = useState({});
+	const { products } = state;
 
-  const { loading, data } = useQuery(QUERY_PRODUCTS);
+	const { id } = useParams();
 
-  const products = data?.products || [];
+	const [currentProduct, setCurrentProduct] = useState({});
 
-  useEffect(() => {
-    if (products.length) {
-      setCurrentProduct(products.find((product) => product._id === id));
-    }
-  }, [products, id]);
+	const { loading, data } = useQuery(QUERY_PRODUCTS);
 
-  return (
-    <>
-      {currentProduct ? (
-        <div className="container my-1">
-          <Link to="/">← Back to Products</Link>
+//	const products = data?.products || [];
 
-          <h2>{currentProduct.name}</h2>
+	useEffect(() => {
+		if (products.length) {
+			setCurrentProduct(products.find((product) => product._id === id));
+		} else {
+			if (data) {
+				dispatch({
+					type: UPDATE_PRODUCTS,
+					products: data.products,
+				});
+			}
+		}
+	}, [products, id, data, dispatch]);
 
-          <p>{currentProduct.description}</p>
+	return (
+		<>
+			{currentProduct ? (
+				<div className="container my-1">
+					<Link to="/">← Back to Products</Link>
 
-          <p>
-            <strong>Price:</strong>${currentProduct.price}{' '}
-            <button>Add to Cart</button>
-            <button>Remove from Cart</button>
-          </p>
+					<h2>{currentProduct.name}</h2>
 
-          <img
-            src={`/images/${currentProduct.image}`}
-            alt={currentProduct.name}
-          />
-        </div>
-      ) : null}
-      {loading ? <img src={spinner} alt="loading" /> : null}
-    </>
-  );
+					<p>{currentProduct.description}</p>
+
+					<p>
+						<strong>Price:</strong>${currentProduct.price}{" "}
+						<button>Add to Cart</button>
+						<button>Remove from Cart</button>
+					</p>
+
+					<img
+						src={`/images/${currentProduct.image}`}
+						alt={currentProduct.name}
+					/>
+				</div>
+			) : null}
+			{loading ? <img src={spinner} alt="loading" /> : null}
+		</>
+	);
 }
 
 export default Detail;

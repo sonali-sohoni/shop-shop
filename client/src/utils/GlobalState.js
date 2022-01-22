@@ -10,6 +10,7 @@ const StoreProvider = ({ value = [], ...props }) => {
 		categories: [],
 		currentCategory: "",
 	});
+	console.log("Global state =");
 	console.log(state);
 	return <Provider value={[state, dispatch]} {...props} />;
 };
